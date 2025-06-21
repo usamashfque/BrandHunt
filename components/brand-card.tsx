@@ -35,18 +35,18 @@ export function BrandCard({ brand }: BrandCardProps) {
                     <div className="flex-grow">
                         <div className="flex items-center justify-between w-full">
                             <h3 className="text-lg font-semibold">{brand.name}</h3>
-                            {/* {brand.category && (
+                            {/* {brand.city && (
                                 <Badge variant="outline" className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">
                                     {brand.category}
                                 </Badge>
                             )} */}
                         </div>
-                        {/* {brand.location && (
+                        {brand.city && (
                             <p className="text-sm text-gray-500 flex items-center mt-1">
                                 <MapPin className="h-3 w-3 mr-1" />
-                                {brand.location}
+                                {brand.city}
                             </p>
-                        )} */}
+                        )}
                     </div>
                 </div>
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">{brand.description}</p>

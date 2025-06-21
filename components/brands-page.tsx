@@ -28,9 +28,25 @@ import {
 } from "@/components/ui/dialog"
 
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" // Import Select components
 
 export function BrandsPage() {
   const supabase = createClient()
+
+  const pakistanCities = [
+    "Islamabad",
+    "Lahore",
+    "Rawalpindi",
+    "Faisalabad",
+    "Multan",
+    "Gujranwala",
+    "Sialkot",
+    "Sargodha",
+    "Bahawalpur",
+    "Sheikhupura",
+    "Rahim Yar Khan",
+  ]
+
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -43,6 +59,7 @@ export function BrandsPage() {
     name: "",
     description: "",
     logo_url: "",
+    city: "", // Add city to formData
   })
 
   useEffect(() => {
@@ -105,6 +122,7 @@ export function BrandsPage() {
             name: "",
             description: "",
             logo_url: "",
+            city: "", // Reset city
           })
           toast({
             title: "Success",
@@ -130,6 +148,7 @@ export function BrandsPage() {
             name: "",
             description: "",
             logo_url: "",
+            city: "", // Reset city
           })
           toast({
             title: "Success",
@@ -155,6 +174,7 @@ export function BrandsPage() {
       name: data.name,
       description: data.description,
       logo_url: data.logo_url,
+      city: data.city || "", // Populate city for editing
     })
     setIsAddDialogOpen(true)
   }
@@ -181,29 +201,6 @@ export function BrandsPage() {
     }
   }
 
-  // const handleToggleStatus = async (guard: SecurityGuard) => {
-  //   try {
-  //     const newStatus = guard.status === "active" ? "inactive" : "active"
-  //     const updatedGuard = await updateBrand(supabase, guard.id, { status: newStatus })
-  //     if (updatedGuard) {
-  //       setGuards((prev) => prev.map((g) => (g.id === guard.id ? { ...g, status: newStatus } : g)))
-  //       toast({
-  //         title: "Success",
-  //         description: `Guard status updated to ${newStatus}`,
-  //       })
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating guard status:", error)
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to update guard status",
-  //       variant: "destructive",
-  //     })
-  //   }
-  // }
-
-  // Update the handleInputChange function to handle file inputs
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setPhotoFile(e.target.files[0])
@@ -213,7 +210,8 @@ export function BrandsPage() {
   const filteredGuards = brands.filter(
     (guard) =>
       guard.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guard.description.toLowerCase().includes(searchTerm.toLowerCase()),
+      guard.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guard.city?.toLowerCase().includes(searchTerm.toLowerCase()), // Include city in search
   )
 
   return (
@@ -228,7 +226,7 @@ export function BrandsPage() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
                   type="search"
-                  placeholder="Search guards..."
+                  placeholder="Search brands..."
                   className="pl-8 w-64"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -268,9 +266,26 @@ export function BrandsPage() {
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="photo">Photo</Label>
-                      <Input id="photo" type="file" accept="image/*" onChange={handleFileChange} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Select value={formData.city} onValueChange={(value) => handleSelectChange("city", value)}>
+                          <SelectTrigger id="city">
+                            <SelectValue placeholder="Select City" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {pakistanCities.map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="photo">Photo</Label>
+                        <Input id="photo" type="file" accept="image/*" onChange={handleFileChange} />
+                      </div>
                     </div>
                   </div>
                   <DialogFooter>
@@ -306,6 +321,7 @@ export function BrandsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Description</TableHead>
+                      <TableHead>City</TableHead> {/* New City column header */}
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -321,6 +337,7 @@ export function BrandsPage() {
                           </div>
                         </TableCell>
                         <TableCell>{brand.description}</TableCell>
+                        <TableCell>{brand.city}</TableCell> {/* Display city */}
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

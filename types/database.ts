@@ -31,6 +31,7 @@ export interface Brand {
   id: string
   name: string
   description: string
+  city: string
   logo_url: string
   created_at: string
   updated_at: string
