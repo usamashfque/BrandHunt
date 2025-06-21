@@ -5,13 +5,13 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Eye, Bell } from "lucide-react"
-import { Product } from "@/types/database"
+import { Product, Products } from "@/types/database"
 import { sampleBrands } from "@/lib/data"
 import Link from "next/link"
 
 
 interface ProductCardProps {
-    product: Product
+    product: Products
 }
 
 export function ProductCard({ product }: ProductCardProps) {
@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <div className="p-4">
                     <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-gray-600">{brand?.name || "Unknown Brand"}</p>
+                        <p className="text-sm text-gray-600">{product?.brands?.name || "Unknown Brand"}</p>
                         {/* <div className="flex items-center text-gray-500 text-xs">
                             <Eye className="h-3 w-3 mr-1" />
                             <span>{product.views || 0}</span>

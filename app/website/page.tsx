@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-import { Brand, Product } from "@/types/database"
+import { Brand, Product, Products } from "@/types/database"
 import { getBrandsData, getProductsData, sampleBrands } from "@/lib/data"
 import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
@@ -18,7 +18,7 @@ import { createClient } from "@/utils/supabase/client"
 export default function WebsitePage() {
   const supabase = createClient()
   const [brands, setBrands] = useState<Brand[]>([])
-  const [products, setProducts] = useState<Product[]>([])
+  const [products, setProducts] = useState<Products[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
 

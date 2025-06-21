@@ -8,7 +8,6 @@ import { SidebarInset } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
@@ -21,9 +20,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Plus, Filter, MoreVertical, Edit, Trash, Eye, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Search, Plus, Filter, MoreVertical, Edit, Trash, Eye, Loader2 } from "lucide-react"
 import { getProducts, createProduct, updateProduct, deleteProduct, getProduct, getBrands } from "@/lib/database"
 import type { Brand, Products } from "@/types/database"
 import { toast } from "@/hooks/use-toast"
@@ -32,6 +30,20 @@ import { createClient } from "@/utils/supabase/client"
 
 export function ProductPage() {
   const supabase = createClient()
+
+  const productCategories = [
+    "Accessories",
+    "Men's Clothing",
+    "Women's Clothing",
+    "Shoes",
+    "Gadgets",
+    "Electronics",
+    "Home & Kitchen",
+    "Books",
+    "Sports",
+    "Beauty",
+  ]
+
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -49,7 +61,7 @@ export function ProductPage() {
     image_url: "",
     website_url: "",
     category: "",
-    brand_id: ""
+    brand_id: "",
   })
 
   const fetchData = async () => {
@@ -101,15 +113,11 @@ export function ProductPage() {
           brand_id: formData.brand_id,
         }
 
-        const _result = await updateProduct(supabase, formData.id, (!!photoUrl ? { ...payload } : payload))
+        const _result = await updateProduct(supabase, formData.id, !!photoUrl ? { ...payload } : payload)
         if (_result) {
           const _newData = await getProduct(supabase, _result.id)
           if (_newData) {
-            setProducts((prev) =>
-              prev.map((_) =>
-                _.id === _newData.id ? _newData : _
-              )
-            )
+            setProducts((prev) => prev.map((_) => (_.id === _newData.id ? _newData : _)))
           }
           setIsAddDialogOpen(false)
           setFormData({
@@ -121,7 +129,7 @@ export function ProductPage() {
             image_url: "",
             website_url: "",
             category: "",
-            brand_id: ""
+            brand_id: "",
           })
           toast({
             title: "Success",
@@ -143,9 +151,8 @@ export function ProductPage() {
         const { id, ...restFormData } = formData // Destructure to exclude 'id'
 
         const payload = {
-          ...restFormData // Use the rest of the form data
+          ...restFormData, // Use the rest of the form data
         }
-
 
         const _result = await createProduct(supabase, payload)
         if (_result) {
@@ -163,7 +170,7 @@ export function ProductPage() {
             image_url: "",
             website_url: "",
             category: "",
-            brand_id: ""
+            brand_id: "",
           })
           toast({
             title: "Success",
@@ -172,8 +179,6 @@ export function ProductPage() {
           setIsFormSubmitting(false)
         }
       }
-
-
     } catch (error) {
       console.error("Error adding store:", error)
       toast({
@@ -195,7 +200,7 @@ export function ProductPage() {
       image_url: data.image_url,
       website_url: data.website_url,
       category: data.category,
-      brand_id: data.brand_id
+      brand_id: data.brand_id,
     })
     setIsAddDialogOpen(true)
   }
@@ -266,14 +271,8 @@ export function ProductPage() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[800px]">
                   <DialogHeader>
-                    <DialogTitle>
-                      {
-                        formData.id ? "Update Product" : "Add New Product"
-                      }
-                    </DialogTitle>
-                    <DialogDescription>
-                      Enter the details of the store. Click save when you're done.
-                    </DialogDescription>
+                    <DialogTitle>{formData.id ? "Update Product" : "Add New Product"}</DialogTitle>
+                    <DialogDescription>Enter the details of the store. Click save when you're done.</DialogDescription>
                   </DialogHeader>
                   <div className="p-1 grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
                     <div className="grid grid-cols-1 gap-4">
@@ -303,17 +302,41 @@ export function ProductPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
-                        <Input id="description" placeholder="" value={formData.description} onChange={handleInputChange} />
+                        <Input
+                          id="description"
+                          placeholder=""
+                          value={formData.description}
+                          onChange={handleInputChange}
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Category</Label>
-                        <Input id="category" placeholder="" value={formData.category} onChange={handleInputChange} />
+                        <Select
+                          value={formData.category}
+                          onValueChange={(value) => handleSelectChange("category", value)}
+                        >
+                          <SelectTrigger id="category">
+                            <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {productCategories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="website_url">Website URL</Label>
-                        <Input id="website_url" placeholder="" value={formData.website_url} onChange={handleInputChange} />
+                        <Input
+                          id="website_url"
+                          placeholder=""
+                          value={formData.website_url}
+                          onChange={handleInputChange}
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -323,7 +346,12 @@ export function ProductPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="discount_price">Discount Price</Label>
-                        <Input id="discount_price" placeholder="" value={formData.discount_price} onChange={handleInputChange} />
+                        <Input
+                          id="discount_price"
+                          placeholder=""
+                          value={formData.discount_price}
+                          onChange={handleInputChange}
+                        />
                       </div>
                     </div>
                   </div>
@@ -332,16 +360,14 @@ export function ProductPage() {
                       Cancel
                     </Button>
                     <Button onClick={handleSubmit} disabled={isFormSubmitting}>
-                      {
-                        isFormSubmitting ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          "Save"
-                        )
-                      }
+                      {isFormSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save"
+                      )}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
