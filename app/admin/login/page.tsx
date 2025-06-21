@@ -14,8 +14,8 @@ import { toast } from "@/hooks/use-toast"
 export default function LoginPage() {
     const router = useRouter()
     const { signIn, session, user } = useAuth()
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
+    const [email, setEmail] = useState("superadmin@yopmail.com")
+    const [password, setPassword] = useState("admin12345")
     const [isLoading, setIsLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -37,8 +37,8 @@ export default function LoginPage() {
                     variant: "default",
                 })
 
-                router.push("/")
-                setIsLoading(false)
+                router.push("/admin")
+                // setIsLoading(false)
             }
         } catch (error: any) {
             toast({
@@ -76,9 +76,6 @@ export default function LoginPage() {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
-                                <a href="#" className="text-sm text-blue-600 hover:underline">
-                                    Forgot password?
-                                </a>
                             </div>
                             <Input
                                 id="password"
