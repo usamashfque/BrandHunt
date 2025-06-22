@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/auth-context"
 import "./globals.css"
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata = {
   title: "Security Admin Dashboard",
@@ -22,6 +23,7 @@ export default function RootLayout({
           <AuthProvider>
             <SidebarProvider>{children}</SidebarProvider>
           </AuthProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -22,11 +22,11 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Plus, Filter, MoreVertical, Edit, Trash, Eye, Loader2 } from "lucide-react"
-import { getProducts, createProduct, updateProduct, deleteProduct, getProduct, getBrands } from "@/lib/database"
-import type { Brand, Products } from "@/types/database"
-import { toast } from "@/hooks/use-toast"
+import { getProducts, createProduct, updateProduct, deleteProduct, getProduct, getBrands, getFollowedBrandsByBrandId, addNotification } from "@/lib/database"
+import type { Brand, Brands, Products } from "@/types/database"
 import { uploadFile } from "@/lib/storage"
 import { createClient } from "@/utils/supabase/client"
+import { toast } from "@/hooks/use-toast"
 
 export function ProductPage() {
   const supabase = createClient()
@@ -48,7 +48,7 @@ export function ProductPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [products, setProducts] = useState<Products[]>([])
-  const [brands, setBrands] = useState<Brand[]>([])
+  const [brands, setBrands] = useState<Brands[]>([])
   const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const [isFormSubmitting, setIsFormSubmitting] = useState(false)
@@ -103,7 +103,7 @@ export function ProductPage() {
 
       // Upload photo if selected
       if (photoFile) {
-        const result = await uploadFile(photoFile, "guard-photos")
+        const result = await uploadFile(photoFile, "products")
         photoUrl = result.url
       }
 
@@ -113,7 +113,10 @@ export function ProductPage() {
           brand_id: formData.brand_id,
         }
 
-        const _result = await updateProduct(supabase, formData.id, !!photoUrl ? { ...payload } : payload)
+        const _result = await updateProduct(supabase,
+          formData.id,
+          !!photoUrl ? { ...payload, image_url: photoUrl } : payload,
+        )
         if (_result) {
           const _newData = await getProduct(supabase, _result.id)
           if (_newData) {
@@ -133,25 +136,17 @@ export function ProductPage() {
           })
           toast({
             title: "Success",
-            description: "Security guard updated successfully",
+            description: "Product updated successfully",
           })
           setIsFormSubmitting(false)
         }
       } else {
-        // const payload = {
-        //   id: "",
-        //   name: formData.name,
-        //   address: formData.address,
-        //   latitude: formData.latitude,
-        //   longitude: formData.longitude,
-        //   brand_id: formData.brand_id
-        // }
-
         // New brand: omit id to let Supabase generate it
         const { id, ...restFormData } = formData // Destructure to exclude 'id'
 
         const payload = {
           ...restFormData, // Use the rest of the form data
+          logo_url: photoUrl || "",
         }
 
         const _result = await createProduct(supabase, payload)
@@ -174,9 +169,17 @@ export function ProductPage() {
           })
           toast({
             title: "Success",
-            description: "Security guard added successfully",
+            description: "Product added successfully",
           })
           setIsFormSubmitting(false)
+
+          const _followers = await getFollowedBrandsByBrandId(supabase, _result.brand_id)
+          if (_followers) {
+            for (const follower of _followers) {
+              // Notify each follower about the new product
+              await addNotification(supabase, follower.user_id, `New product added by ${follower.brands.name}`)
+            }
+          }
         }
       }
     } catch (error) {
@@ -213,7 +216,7 @@ export function ProductPage() {
           setProducts((prev) => prev.filter((guard) => guard.id !== id))
           toast({
             title: "Success",
-            description: "Security guard deleted successfully",
+            description: "Product deleted successfully",
           })
         }
       } catch (error) {
@@ -352,6 +355,12 @@ export function ProductPage() {
                           value={formData.discount_price}
                           onChange={handleInputChange}
                         />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="photo">Photo</Label>
+                        <Input id="photo" type="file" accept="image/*" onChange={handleFileChange} />
                       </div>
                     </div>
                   </div>

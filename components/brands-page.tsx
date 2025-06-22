@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Search, Plus, Filter, MoreVertical, Edit, Trash, Eye, Loader2, Building2 } from "lucide-react"
 import { getBrands, createBrand, updateBrand, deleteBrand } from "@/lib/database"
-import type { Brand } from "@/types/database"
+import type { Brand, Brands } from "@/types/database"
 import { createClient } from "@/utils/supabase/client"
 import { useState, useEffect } from "react"
 import { toast } from "@/hooks/use-toast"
@@ -50,7 +50,7 @@ export function BrandsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [brands, setBrands] = useState<Brand[]>([])
+  const [brands, setBrands] = useState<Brands[]>([])
   const [photoFile, setPhotoFile] = useState<File | null>(null)
 
   const [isFormSubmitting, setIsFormSubmitting] = useState(false)

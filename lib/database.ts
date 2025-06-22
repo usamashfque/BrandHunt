@@ -1,4 +1,4 @@
-import type { Product, Brand, Products, User } from "@/types/database"
+import type { Product, Brand, Products, User, UserFollowsBrand, Brands } from "@/types/database"
 
 //#region Product
 export async function getProducts(supabase: any) {
@@ -79,7 +79,7 @@ export async function getBrands(supabase: any) {
     return []
   }
 
-  return data as Brand[]
+  return data as Brands[]
 }
 
 export async function createBrand(supabase: any, guard: Omit<Brand, "id" | "created_at" | "updated_at">) {
@@ -94,7 +94,7 @@ export async function createBrand(supabase: any, guard: Omit<Brand, "id" | "crea
     return null
   }
 
-  return data[0] as Brand
+  return data[0] as Brands
 }
 
 export async function updateBrand(supabase: any, id: string, guard: Partial<Brand>) {
@@ -109,7 +109,7 @@ export async function updateBrand(supabase: any, id: string, guard: Partial<Bran
     return null
   }
 
-  return data[0] as Brand
+  return data[0] as Brands
 }
 
 export async function deleteBrand(supabase: any, id: string) {
@@ -207,16 +207,100 @@ export async function unfollowBrand(supabase: any, userId: string, brandId: stri
   return true
 }
 
-export async function getFollowedBrands(supabase: any, userId: string): Promise<Brand[]> {
+export async function getFollowedBrands(supabase: any, userId: string): Promise<UserFollowsBrand[]> {
   const { data, error } = await supabase
     .from("user_follows_brand")
-    .select("brands(*)") // Select the brand details through the join
+    .select("*, brands(*)") // Select the brand details through the join
     .eq("user_id", userId)
 
   if (error) {
     console.error("Error fetching followed brands:", error)
     return []
   }
-  // The data will be an array of { brands: Brand } objects, so map it
-  return data.map((item: { brands: Brand }) => item.brands)
+
+  return data as UserFollowsBrand[];
+}
+
+export async function getFollowedBrandsByBrandId(supabase: any, brand_id: string): Promise<UserFollowsBrand[]> {
+  const { data, error } = await supabase
+    .from("user_follows_brand")
+    .select("*, brands(*)") // Select the brand details through the join
+    .eq("brand_id", brand_id)
+
+  if (error) {
+    console.error("Error fetching followed brands:", error)
+    return []
+  }
+
+  return data as UserFollowsBrand[];
+}
+
+// --- Notification Functions ---
+
+export async function addNotification(supabase: any, userId: string, title: string) {
+  const { data, error } = await supabase
+    .from("notifications")
+    .insert([{ user_id: userId, title: title, is_read: false }])
+    .select()
+
+  if (error) {
+    console.error("Error following brand:", error)
+    throw error
+  }
+}
+
+
+export async function getNotifications(supabase: any, userId: string) {
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    console.error("Error fetching notifications:", error)
+    return []
+  }
+  return data
+}
+
+export async function getUnreadNotificationsCount(supabase: any, userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("is_read", false)
+
+  if (error) {
+    console.error("Error fetching unread notifications count:", error)
+    return 0
+  }
+  return count || 0
+}
+
+export async function markNotificationAsRead(supabase: any, notificationId: number) {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ is_read: true, updated_at: new Date().toISOString() })
+    .eq("id", notificationId)
+
+  if (error) {
+    console.error("Error marking notification as read:", error)
+    throw error
+  }
+  return true
+}
+
+export async function markAllNotificationsAsRead(supabase: any, userId: string) {
+  const { error } = await supabase
+    .from("notifications")
+    .update({ is_read: true, updated_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("is_read", false)
+
+  if (error) {
+    console.error("Error marking all notifications as read:", error)
+    throw error
+  }
+  return true
 }
