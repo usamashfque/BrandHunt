@@ -5,39 +5,44 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Building2, CreditCard, Clock, AlertCircle, CheckCircle, Users, Loader2 } from "lucide-react"
+import { getBrands, getProducts } from "@/lib/database"
+import { createClient } from "@/utils/supabase/client"
 
 export function DashboardContent() {
+  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
   const [stats, setStats] = useState({
-    activeGuards: 0,
-    companies: 0,
+    totalBrands: 0, // Renamed from activeGuards
+    totalProducts: 0, // Renamed from companies
     revenue: 0,
     pendingRequests: 0,
   })
-  const [recentRequests, setRecentRequests] = useState<Request[]>([])
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsLoading(true)
-  //     try {
-  //       const dashboardStats = await getDashboardStats()
-  //       const requests = await getRecentRequests()
-  //       setStats(dashboardStats)
-  //       setRecentRequests(requests)
-  //     } catch (error) {
-  //       console.error("Error fetching dashboard data:", error)
-  //       toast({
-  //         title: "Error",
-  //         description: "Failed to load dashboard data",
-  //         variant: "destructive",
-  //       })
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   }
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const brandsData = await getBrands(supabase)
+        const productsData = await getProducts(supabase)
 
-  //   fetchData()
-  // }, [])
+        // Simulate other stats if not fetching from DB yet
+        const dashboardStats = {
+          totalBrands: brandsData.length,
+          totalProducts: productsData.length,
+          revenue: 0, // Placeholder
+          pendingRequests: 0, // Placeholder
+        }
+
+        setStats(dashboardStats)
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   if (isLoading) {
     return (
@@ -61,11 +66,11 @@ export function DashboardContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Stores</CardTitle>
+            <CardTitle className="text-sm font-medium">Brands</CardTitle>
             <Shield className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.activeGuards}</div>
+            <div className="text-2xl font-bold">{stats.totalBrands}</div>
           </CardContent>
         </Card>
         <Card>
@@ -74,7 +79,7 @@ export function DashboardContent() {
             <Building2 className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.companies}</div>
+            <div className="text-2xl font-bold">{stats.totalProducts}</div>
           </CardContent>
         </Card>
         <Card>

@@ -29,7 +29,7 @@ export function MainSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const menuItems = [
-    { name: "Dashboard", icon: BarChart3, path: "/admin" },
+    { name: "Dashboard", icon: BarChart3, path: "/admin/dashboard" },
     { name: "Brands", icon: Building2, path: "/admin/brands" },
     { name: "Products", icon: Shield, path: "/admin/products" },
     // { name: "Payment History", icon: CreditCard, path: "/payment-history" },

@@ -56,7 +56,7 @@ export default function WebsitePage() {
   )
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="w-full flex flex-col min-h-screen bg-gray-50">
       <Header />
       <HeroSection />
 
